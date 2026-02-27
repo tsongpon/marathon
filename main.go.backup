@@ -1,0 +1,70 @@
+package main
+
+import (
+	"context"
+	"io"
+	"net/http"
+	"os"
+
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sns"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
+)
+
+func main() {
+	e := echo.New()
+	e.Use(middleware.RequestLogger())
+
+	e.GET("/", func(c *echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
+
+	e.POST("/msteam-alert", func(c *echo.Context) error {
+		targetURL := "https://defaultc613c6146e824ad48307a3ce9732a9.f8.environment.api.powerplatform.com/powerautomate/automations/direct/workflows/d93b09a9231a475fb04ff14faad495ae/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sJk4c0IvnyLk6w_qq8XnHF02I68tvG0HiKPIIBkwkgk"
+
+		req := c.Request()
+		resp, err := http.Post(targetURL, req.Header.Get("Content-Type"), req.Body)
+		if err != nil {
+			return c.JSON(http.StatusBadGateway, map[string]string{"error": err.Error()})
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		}
+
+		return c.Blob(resp.StatusCode, resp.Header.Get("Content-Type"), body)
+	})
+
+	e.POST("/sms-alert", func(c *echo.Context) error {
+		cfg, err := config.LoadDefaultConfig(context.TODO())
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		}
+
+		client := sns.NewFromConfig(cfg)
+		message := "hello"
+		phoneNumber := "+66809710099"
+
+		result, err := client.Publish(context.TODO(), &sns.PublishInput{
+			Message:     &message,
+			PhoneNumber: &phoneNumber,
+		})
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		}
+
+		return c.JSON(http.StatusOK, map[string]string{"messageId": *result.MessageId})
+	})
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "1323"
+	}
+
+	if err := e.Start(":" + port); err != nil {
+		e.Logger.Error("failed to start server", "error", err)
+	}
+}

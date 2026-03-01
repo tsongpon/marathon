@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"time"
@@ -58,13 +59,9 @@ func (h *AlertHttpHandler) CreateSignozAlert(c *echo.Context) error {
 }
 
 func (h *AlertHttpHandler) NotifyAlerts(c *echo.Context) error {
-	ctx := c.Request().Context()
-	err := h.service.Notify(ctx, time.Now())
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to notify alerts"})
-	}
+	go h.service.Notify(context.Background(), time.Now())
 
-	return c.NoContent(http.StatusOK)
+	return c.JSON(http.StatusAccepted, map[string]string{"status": "notification job started"})
 }
 
 func (h *AlertHttpHandler) DeleteAlerts(c *echo.Context) error {

@@ -28,7 +28,8 @@ func NewSMSNotificationRepository() (*SMSNotificationRepository, error) {
 }
 
 func (r *SMSNotificationRepository) SendNotification(ctx context.Context, alert model.Alert, onCall model.OnCall) error {
-	message := fmt.Sprintf("[ALERT] %s\n%s", alert.Title, alert.Details)
+	ackMessage := fmt.Sprintf("To ack: https://marathon-443460999135.asia-southeast1.run.app/alerts/%s/ack", alert.ID)
+	message := fmt.Sprintf("[ALERT] %s\n%s\n\n%s", alert.Title, alert.Details, ackMessage)
 
 	input := &sns.PublishInput{
 		Message:     aws.String(message),

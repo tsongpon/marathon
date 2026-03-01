@@ -11,6 +11,7 @@ type Alert struct {
 }
 
 type OnCall struct {
-	Name        string
-	PhoneNumber string
+	Name            string
+	PhoneNumber     string
+	SlackWebhookURL string
 }

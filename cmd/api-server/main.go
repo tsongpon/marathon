@@ -22,6 +22,11 @@ func main() {
 
 	ctx := context.Background()
 
+	slackWebhookURL := os.Getenv("SLACK_WEBHOOK_URL")
+	if slackWebhookURL == "" {
+		log.Fatal("SLACK_WEBHOOK_URL environment variable is required")
+	}
+
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	if projectID == "" {
 		log.Fatal("GOOGLE_CLOUD_PROJECT environment variable is required")
@@ -33,17 +38,10 @@ func main() {
 	}
 	defer firestoreClient.Close()
 
-	onCallCalendarID := os.Getenv("ON_CALL_CALENDAR_ID")
-	googleCalendarCredential := os.Getenv("GOOGLE_CREDENTIALS_JSON")
-
 	alertRepo := repository.NewAlertFirestoreRepository(firestoreClient)
-	onCallRepo := repository.NewOnCallGoogleCalendarRepository(googleCalendarCredential, onCallCalendarID)
-	notificationRepo, err := repository.NewSMSNotificationRepository()
-	if err != nil {
-		log.Fatalf("failed to create notification repository: %v", err)
-	}
+	notificationRepo := repository.NewSlackNotificationRepository()
 
-	alertService := service.NewAlertService(alertRepo, onCallRepo, notificationRepo)
+	alertService := service.NewAlertService(alertRepo, notificationRepo, slackWebhookURL)
 	alertHandler := handler.NewAlertHttpHandler(alertService)
 
 	e := echo.New()

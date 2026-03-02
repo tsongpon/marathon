@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,13 +14,15 @@ import (
 type AlertService struct {
 	alertRepo        AlertRepository
 	notificationRepo NotificationRepository
+	onCallRepo       OnCallRepository
 	slackWebhookURL  string
 }
 
-func NewAlertService(alertRepo AlertRepository, notificationRepo NotificationRepository, slackWebhookURL string) *AlertService {
+func NewAlertService(alertRepo AlertRepository, notificationRepo NotificationRepository, onCallRepo OnCallRepository, slackWebhookURL string) *AlertService {
 	return &AlertService{
 		alertRepo:        alertRepo,
 		notificationRepo: notificationRepo,
+		onCallRepo:       onCallRepo,
 		slackWebhookURL:  slackWebhookURL,
 	}
 }
@@ -51,7 +54,19 @@ func (s *AlertService) Notify(ctx context.Context, asOf time.Time) error {
 	}
 	logger.Info("Number of alerts", zap.Int("alert", len(alerts)))
 	if len(alerts) > 0 {
-		onCall := model.OnCall{Name: "Slack On-call Channel", SlackWebhookURL: s.slackWebhookURL}
+		onDutyOnCall, err := s.onCallRepo.GetOnCalls(ctx, asOf)
+		if err != nil {
+			logger.Error("Failed to get oncall", zap.Error(err))
+			return err
+		}
+		var onCallNames strings.Builder
+		for i, onCall := range onDutyOnCall {
+			onCallNames.WriteString(onCall.Name)
+			if i < len(onDutyOnCall)-1 {
+				onCallNames.WriteString("\n")
+			}
+		}
+		onCall := model.OnCall{Name: onCallNames.String(), SlackWebhookURL: s.slackWebhookURL}
 		for _, alert := range alerts {
 			for i := range 5 {
 				logger.Info("Sending alert to oncall", zap.String("SlackWebhookURL", onCall.SlackWebhookURL), zap.Int("attempt", i+1))

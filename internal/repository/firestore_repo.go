@@ -23,6 +23,7 @@ func (r *AlertFirestoreRepository) CreateAlert(ctx context.Context, alert model.
 		"id":              alert.ID,
 		"title":           alert.Title,
 		"details":         alert.Details,
+		"severity":        alert.Severity,
 		"created_at":      alert.CreatedAt,
 		"is_acknowledged": alert.IsAcknowledged,
 	})

@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/tsongpon/marathon/internal/model"
@@ -55,10 +54,7 @@ func (r *OnCallGoogleCalendarRepository) GetOnCalls(ctx context.Context, asOf ti
 
 	var onCalls []model.OnCall
 	for _, item := range todayOncallEvents.Items {
-		onCall := model.OnCall{
-			Name:        strings.Split(item.Summary, "|")[0],
-			PhoneNumber: strings.Split(item.Summary, "|")[1],
-		}
+		onCall := model.OnCall{Name: item.Summary}
 		onCalls = append(onCalls, onCall)
 	}
 	return onCalls, nil

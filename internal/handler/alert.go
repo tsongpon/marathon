@@ -11,8 +11,9 @@ import (
 )
 
 type createAlertRequest struct {
-	Title   string `json:"title"`
-	Details string `json:"details"`
+	Title    string `json:"title"`
+	Details  string `json:"details"`
+	Severity string `json:"severity"`
 }
 
 type AlertHttpHandler struct {
@@ -34,8 +35,9 @@ func (h *AlertHttpHandler) CreateGenericAlerts(c *echo.Context) error {
 	}
 
 	alert := model.Alert{
-		Title:   req.Title,
-		Details: req.Details,
+		Title:    req.Title,
+		Details:  req.Details,
+		Severity: req.Severity,
 	}
 
 	created, err := h.service.CreateAlert(c.Request().Context(), alert)

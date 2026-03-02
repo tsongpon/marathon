@@ -37,11 +37,14 @@ func main() {
 		log.Fatalf("failed to create firestore client: %v", err)
 	}
 	defer firestoreClient.Close()
+	onCallCalendarID := os.Getenv("ON_CALL_CALENDAR_ID")
+	googleCalendarCredential := os.Getenv("GOOGLE_CREDENTIALS_JSON")
+	onCallRepo := repository.NewOnCallGoogleCalendarRepository(googleCalendarCredential, onCallCalendarID)
 
 	alertRepo := repository.NewAlertFirestoreRepository(firestoreClient)
 	notificationRepo := repository.NewSlackNotificationRepository()
 
-	alertService := service.NewAlertService(alertRepo, notificationRepo, slackWebhookURL)
+	alertService := service.NewAlertService(alertRepo, notificationRepo, onCallRepo, slackWebhookURL)
 	alertHandler := handler.NewAlertHttpHandler(alertService)
 
 	e := echo.New()

@@ -69,7 +69,7 @@ func buildSlackPayload(alert model.Alert, onCall model.OnCall) map[string]any {
 			{
 				"type": "section",
 				"fields": []map[string]any{
-					{"type": "mrkdwn", "text": "*Severity:*\n🔴 Critical"},
+					{"type": "mrkdwn", "text": fmt.Sprintf("*Severity:*\n%s", alert.Severity)},
 					{"type": "mrkdwn", "text": "*Status:*\n🔥 Firing"},
 					{"type": "mrkdwn", "text": fmt.Sprintf("*Service:*\n%s", alert.Title)},
 					{"type": "mrkdwn", "text": "*Environment:*\nProduction"},

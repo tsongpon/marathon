@@ -41,6 +41,7 @@ func (s *AlertService) CreateAlert(ctx context.Context, alert model.Alert) (mode
 }
 
 func (s *AlertService) DeleteAlert(ctx context.Context, id string) error {
+	logger.Info("Delete alert", zap.String("alertID", id))
 	err := s.alertRepo.DeleteAlert(ctx, id)
 	if err != nil {
 		return err

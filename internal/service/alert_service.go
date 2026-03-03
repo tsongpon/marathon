@@ -28,14 +28,16 @@ func NewAlertService(alertRepo AlertRepository, notificationRepo NotificationRep
 }
 
 func (s *AlertService) CreateAlert(ctx context.Context, alert model.Alert) (model.Alert, error) {
-	alert.CreatedAt = time.Now()
-	alert.ID = uuid.New().String()
-	err := s.alertRepo.CreateAlert(ctx, alert)
-	if err != nil {
-		return model.Alert{}, err
+	if strings.EqualFold(alert.Status, "Firing") {
+		alert.CreatedAt = time.Now()
+		alert.ID = uuid.New().String()
+		err := s.alertRepo.CreateAlert(ctx, alert)
+		if err != nil {
+			return model.Alert{}, err
+		}
+		return alert, nil
 	}
-	s.Notify(ctx, time.Now())
-	return alert, nil
+	return model.Alert{}, nil
 }
 
 func (s *AlertService) DeleteAlert(ctx context.Context, id string) error {

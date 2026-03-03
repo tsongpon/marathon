@@ -57,6 +57,7 @@ func main() {
 	e.POST("/generic/alerts", alertHandler.CreateGenericAlerts)
 	e.POST("/notify/alerts", alertHandler.NotifyAlerts)
 	e.POST("/signoz/alerts", alertHandler.CreateSignozAlert)
+	e.GET("/alerts/:id/ack", alertHandler.AckAlerts)
 
 	port := os.Getenv("PORT")
 	if port == "" {

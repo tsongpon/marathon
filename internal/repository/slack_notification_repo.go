@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/tsongpon/marathon/internal/logger"
 	"github.com/tsongpon/marathon/internal/model"
@@ -69,7 +70,7 @@ func buildSlackPayload(alert model.Alert, onCall model.OnCall) map[string]any {
 			{
 				"type": "section",
 				"fields": []map[string]any{
-					{"type": "mrkdwn", "text": fmt.Sprintf("*Severity:*\n%s", alert.Severity)},
+					{"type": "mrkdwn", "text": "*Severity:*\n🔴 Critical"},
 					{"type": "mrkdwn", "text": "*Status:*\n🔥 Firing"},
 					{"type": "mrkdwn", "text": fmt.Sprintf("*Service:*\n%s", alert.Title)},
 					{"type": "mrkdwn", "text": "*Environment:*\nProduction"},
@@ -85,7 +86,7 @@ func buildSlackPayload(alert model.Alert, onCall model.OnCall) map[string]any {
 			{
 				"type": "section",
 				"fields": []map[string]any{
-					{"type": "mrkdwn", "text": fmt.Sprintf("*Started At:*\n%s", alert.CreatedAt.Format("2006-01-02 15:04:05 UTC"))},
+					{"type": "mrkdwn", "text": fmt.Sprintf("*Started At:*\n%s", alert.CreatedAt.In(time.FixedZone("Asia/Bangkok", 7*60*60)).Format("2006-01-02 15:04:05"))},
 					{"type": "mrkdwn", "text": fmt.Sprintf("*On-Call:*\n%s", onCall.Name)},
 				},
 			},
@@ -94,12 +95,12 @@ func buildSlackPayload(alert model.Alert, onCall model.OnCall) map[string]any {
 				"elements": []map[string]any{
 					{
 						"type": "button",
-						"text": map[string]any{"type": "plain_text", "text": "📊 View Dashboard", "emoji": true},
+						"text": map[string]any{"type": "plain_text", "text": "📊 Signoz Dashboard", "emoji": true},
 						"url":  "https://signoz.yourdomain.com/dashboard/prod-api",
 					},
 					{
 						"type": "button",
-						"text": map[string]any{"type": "plain_text", "text": "📖 Runbook", "emoji": true},
+						"text": map[string]any{"type": "plain_text", "text": "📖 Confluence Runbook", "emoji": true},
 						"url":  "https://confluence.yourdomain.com/runbook/high-cpu",
 					},
 					{

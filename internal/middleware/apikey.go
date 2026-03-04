@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/labstack/echo/v5"
 )
@@ -10,7 +11,8 @@ import (
 func APIKeyAuth() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c *echo.Context) error {
-			if c.Request().URL.Path == "/ping" {
+			path := c.Request().URL.Path
+			if path == "/ping" || (strings.HasPrefix(path, "/alerts/") && strings.HasSuffix(path, "/ack")) {
 				return next(c)
 			}
 			apiKey := c.QueryParam("api_key")

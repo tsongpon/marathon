@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 	"github.com/tsongpon/marathon/internal/handler"
+	custommiddleware "github.com/tsongpon/marathon/internal/middleware"
 	"github.com/tsongpon/marathon/internal/repository"
 	"github.com/tsongpon/marathon/internal/service"
 )
@@ -49,6 +50,7 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.RequestLogger())
+	e.Use(custommiddleware.APIKeyAuth())
 
 	e.GET("/ping", func(c *echo.Context) error {
 		return c.String(http.StatusOK, "pong")

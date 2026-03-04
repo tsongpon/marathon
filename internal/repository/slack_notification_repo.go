@@ -119,7 +119,7 @@ func buildSlackPayload(alert model.Alert, onCall model.OnCall) map[string]any {
 				"elements": []map[string]any{
 					{
 						"type": "mrkdwn",
-						"text": fmt.Sprintf("🔔 Alert ID: `%s` | Source: SigNoz | <https://your-alert-system.com/alerts|View All Alerts>", alert.ID),
+						"text": fmt.Sprintf("🔔 Alert ID: `%s` | Source: Sentinel | <https://your-alert-system.com/alerts|View All Alerts>", alert.ID),
 					},
 				},
 			},
